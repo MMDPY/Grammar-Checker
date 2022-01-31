@@ -1,0 +1,24 @@
+name: pre-submission-checks
+on: [push]
+jobs:
+  check-project-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Go to repo directory
+        run: cd $GITHUB_WORKSPACE
+      - name: Check README
+        run: test -f README.md 
+      - name: Install dependencies
+        run: |
+          if test -f "requirements.txt"; then
+              pip install --user -r requirements.txt
+          else 
+              pip install nltk pandas regex
+          fi
+      - name: Run
+        run: python3 src/main.py data/train.tsv grammars/toy.cfg output/train.tsv
+      - name: Check output files
+        run: |
+          test -f output/train.tsv
+          [[ $(wc -l < output/train.tsv) -eq 604 ]]
